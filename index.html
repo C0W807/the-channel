@@ -648,16 +648,16 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
         ]
       },
       '0145': {
-        id: '0145', title: 'Tall Ships hospitality', client: 'City council tender', date: '14–17 Jul', time: '4 days', covers: 400, days: 4, service: 'Hot lunch on board',
-        budget: 62.5, asks: 'Hot food served on the ships', note: 'A tender. Anna reviews any No before it’s dropped.', due: 'Fri 7 May',
+        id: '0145', title: 'Riverside festival hospitality', client: 'Festival tender', date: '14–17 Jul', time: '4 days', covers: 400, days: 4, service: 'Hot lunch on site',
+        budget: 62.5, asks: 'Hot food served on the festival site', note: 'A tender. The GM reviews any decline before it’s dropped.', due: 'Fri 7 May',
         status: 'ops', updated: 'Yesterday', tender: true, coffee: false,
-        answer: { kind: 'no', reasons: ['Equipment', 'Transport or access'], fixes: [], custom: '', voice: true, note: 'No hot boxes, and no way to get hot food onto the ships.' },
+        answer: { kind: 'no', reasons: ['Equipment', 'Transport or access'], fixes: [], custom: '', voice: true, note: 'No hot boxes, and no way to get hot food out to the site.' },
         heads: [], fixOptions: ['Hire hot boxes and a van · get a quote', '6 agency staff for 4 days · get a quote'],
         menus: { if: { lines: [['Braised beef, mash, greens'], ['Roast squash and lentils'], ['Sticky toffee pudding']], price: 59 } },
         msgs: [
-          { from: 'ops', text: 'Council tender for the Tall Ships: 400 covers a day for 4 days, served on board. Can the kitchen do it?', time: 'Mon' },
-          { from: 'chef', kind: 'no', reasons: ['Equipment', 'Transport or access'], fixes: [], voice: true, note: 'No hot boxes, and no way to get hot food onto the ships.', time: 'Mon' },
-          { from: 'system', text: 'Over £5,000, so it went to Anna before anyone tells the council' }
+          { from: 'ops', text: 'Festival tender: 400 covers a day for 4 days, served on site. Can the kitchen do it?', time: 'Mon' },
+          { from: 'chef', kind: 'no', reasons: ['Equipment', 'Transport or access'], fixes: [], voice: true, note: 'No hot boxes, and no way to get hot food out to the site.', time: 'Mon' },
+          { from: 'system', text: 'Over £5,000, so it went to the GM before anyone tells the organisers' }
         ]
       },
       '0144': {
@@ -760,7 +760,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
 
   function statusPill(c) {
     if (c.status === 'kitchen') return '<span class="pill pill-kitchen">With kitchen</span>';
-    if (c.status === 'ops') return '<span class="pill pill-ops">With Anna</span>';
+    if (c.status === 'ops') return '<span class="pill pill-ops">With the GM</span>';
     if (c.status === 'answered') {
       var k = c.answer.kind;
       return k === 'yes' ? '<span class="pill pill-yes">Accepted</span>' : k === 'if' ? '<span class="pill pill-if">Modified</span>' : '<span class="pill pill-no">Declined</span>';
@@ -771,7 +771,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
   }
   function itemLine(c) {
     if (c.status === 'kitchen') return 'Answer due ' + c.due;
-    if (c.status === 'ops') return 'Declined on ' + gbp(value(c)) + '. Anna to decide';
+    if (c.status === 'ops') return 'Declined on ' + gbp(value(c)) + '. GM to decide';
     if (c.status === 'answered') {
       var a = c.answer;
       if (a.kind === 'yes') return 'The head chef accepted it as asked';
@@ -788,27 +788,27 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
     var c = c42();
     var st = c ? c.status : null;
     return [
-      { label: 'Sam sends a check', done: !!c, go: function () { S.role = 'sales'; S.salesView = 'new'; } },
+      { label: 'Sales sends a check', done: !!c, go: function () { S.role = 'sales'; S.salesView = 'new'; } },
       { label: 'Head chef gets a text', done: S.opened, go: function () { S.role = 'chef'; S.phone = 'messages'; } },
       { label: 'Head chef decides', done: !!(c && c.answer), go: function () { S.role = 'chef'; if (c) { openCheck('0142'); } } },
-      { label: 'Sam quotes or closes', done: !!(c && ['quoted', 'won', 'lost'].indexOf(st) > -1), go: function () { S.role = 'sales'; S.salesView = 'inbox'; if (c) S.selected = '0142'; } },
-      { label: 'Sam records the outcome', done: !!(c && (st === 'won' || st === 'lost')), go: function () { S.role = 'sales'; S.salesView = 'inbox'; if (c) S.selected = '0142'; } },
-      { label: 'Anna sees the trends', done: S.opsSeenAfter, go: function () { S.role = 'ops'; S.opsView = 'trends'; } }
+      { label: 'Sales quotes or closes', done: !!(c && ['quoted', 'won', 'lost'].indexOf(st) > -1), go: function () { S.role = 'sales'; S.salesView = 'inbox'; if (c) S.selected = '0142'; } },
+      { label: 'Sales records the outcome', done: !!(c && (st === 'won' || st === 'lost')), go: function () { S.role = 'sales'; S.salesView = 'inbox'; if (c) S.selected = '0142'; } },
+      { label: 'The GM sees the trends', done: S.opsSeenAfter, go: function () { S.role = 'ops'; S.opsView = 'trends'; } }
     ];
   }
   var HINTS = [
     'Check the budget, then press Send to the head chef.',
     'Switch to the head chef’s phone and open the new text.',
     'Pick Modify, see the lobster swapped on the menu, tick a reason, then send.',
-    'Back as Sam: the quote builds from the head chef’s menu. Send it.',
+    'Back in Sales: the quote builds from the head chef’s menu. Send it.',
     'Mark the quote won, lost or no reply.',
-    'Switch to Anna, then open Trends: every decision, the reasons, over time.'
+    'Switch to the GM, then open Trends: every decision, the reasons, over time.'
   ];
   function story() {
     var ss = steps();
     var cur = -1;
     for (var i = 0; i < ss.length; i++) { if (!ss[i].done) { cur = i; break; } }
-    var hint = cur === -1 ? 'That’s the whole loop. Now open Kitchen decisions, tap a reason in Trends, or make the Tall Ships call.' : HINTS[cur];
+    var hint = cur === -1 ? 'That’s the whole loop. Now open Kitchen decisions, tap a reason in Trends, or make the festival call.' : HINTS[cur];
     var doneN = ss.filter(function (x) { return x.done; }).length;
     return '<div class="story"><span class="story-bar" aria-hidden="true"><i style="width:' + (doneN / ss.length * 100).toFixed(1) + '%"></i></span><div class="steps-wrap"><ol class="steps" aria-label="Demo story">' +
       ss.map(function (s, i) {
@@ -819,7 +819,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
 
   /* ---------------- Shell ---------------- */
   function shell() {
-    var roles = [['sales', 'S', 'Sam', 'Sales'], ['chef', 'H', 'Head chef', 'Main kitchen'], ['ops', 'A', 'Anna', 'General manager']];
+    var roles = [['sales', 'S', 'Sales', 'Events team'], ['chef', 'H', 'Head chef', 'Main kitchen'], ['ops', 'G', 'GM', 'General manager']];
     var body = S.role === 'sales' ? sales() : S.role === 'chef' ? chef() : ops();
     return '<header class="proto"><div class="proto-l"><span class="proto-brand"><span class="logo logo-inv" role="img" aria-label="Ondo"></span><span class="rule" aria-hidden="true"></span><span class="proto-name">The Channel</span></span><span class="proto-tag">Prototype</span></div>' +
       '<nav class="roles" aria-label="View as">' + roles.map(function (r) {
@@ -833,11 +833,11 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       '<div class="logo logo-lg" role="img" aria-label="Ondo, taste the new"></div>' +
       '<p class="label">A prototype for Ondo</p>' +
       '<h1 class="display" id="intro-title">The <span class="accent">Channel</span></h1>' +
-      '<p class="intro-lede">One channel between sales and the kitchen. Before anything is quoted, the kitchen manager accepts, modifies or declines it, with a reason. Every decision is kept and trended, so you can see what gets turned down, why, and what fixes it.</p>' +
+      '<p class="intro-lede">One channel between sales and the kitchen. Before anything is quoted, the head chef accepts, modifies or declines it, with a reason. Every decision is kept and trended, so you can see what gets turned down, why, and what fixes it.</p>' +
       '<ul class="intro-roles">' +
-      '<li><span class="av">S</span><span><b>Sam, sales</b><span class="s">Sends a check with the client’s budget per head.</span></span></li>' +
+      '<li><span class="av">S</span><span><b>Sales</b><span class="s">Sends a check with the client’s budget per head.</span></span></li>' +
       '<li><span class="av av-chef">H</span><span><b>Head chef, Main kitchen</b><span class="s">Accepts, modifies or declines from a text. No app.</span></span></li>' +
-      '<li><span class="av av-ops">A</span><span><b>Anna, GM</b><span class="s">Sees every decision, the reasons, and the trends.</span></span></li>' +
+      '<li><span class="av av-ops">G</span><span><b>General manager</b><span class="s">Sees every decision, the reasons, and the trends.</span></span></li>' +
       '</ul>' +
       '<div class="intro-actions"><button type="button" class="btn" data-act="tour" id="tour-btn">Take the two-minute tour ' + I.arrow + '</button><button type="button" class="btn-ghost" data-act="explore">Explore on my own</button></div>' +
       '<p class="muted intro-foot">Example data throughout. Nothing you do here is sent anywhere.</p></div></div>';
@@ -872,7 +872,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
   function side(items, me) {
     return '<aside class="side"><div class="brand"><div class="logo" role="img" aria-label="Ondo, taste the new"></div><span class="brand-sub">The Channel</span></div>' +
       '<nav class="side-nav" aria-label="Sections">' + items.join('') + '</nav>' +
-      '<div class="me"><span class="av ' + (me[0] === 'A' ? 'av-ops' : '') + '">' + me[0] + '</span><div><b>' + me[1] + '</b><small>' + me[2] + '</small></div></div></aside>';
+      '<div class="me"><span class="av ' + (me[0] === 'G' ? 'av-ops' : '') + '">' + me[0] + '</span><div><b>' + me[1] + '</b><small>' + me[2] + '</small></div></div></aside>';
   }
   function navItem(act, arg, icon, label, current, count) {
     return '<button type="button" class="nav-item" data-act="' + act + '" data-arg="' + arg + '"' + (current ? ' aria-current="page"' : '') + '>' + icon + label + (count != null ? '<span class="count">' + count + '</span>' : '') + '</button>';
@@ -885,7 +885,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       navItem('salesView', 'inbox', I.inbox, 'Enquiries', S.salesView === 'inbox', open),
       navItem('salesView', 'new', I.plus, 'New check', S.salesView === 'new')
     ];
-    return '<div class="app">' + side(nav, ['S', 'Sam', 'Sales · Main kitchen']) + '<main class="page" id="main">' + (S.salesView === 'new' ? newCheck() : inbox()) + '</main></div>';
+    return '<div class="app">' + side(nav, ['S', 'Sales', 'Events team · Main kitchen']) + '<main class="page" id="main">' + (S.salesView === 'new' ? newCheck() : inbox()) + '</main></div>';
   }
 
   function newCheck() {
@@ -985,7 +985,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
   function thread(c) {
     var msgs = c.msgs.map(function (m) {
       if (m.from === 'sales') return '<div class="msg msg-me"><span>' + esc(m.text) + '</span><span class="time">You · ' + esc(m.time) + '</span></div>';
-      if (m.from === 'ops') return '<div class="msg-row"><span class="av av-ops">A</span><div class="msg msg-them" style="max-width:100%"><span>' + esc(m.text) + '</span><span class="time">Anna · ' + esc(m.time) + '</span></div></div>';
+      if (m.from === 'ops') return '<div class="msg-row"><span class="av av-ops">A</span><div class="msg msg-them" style="max-width:100%"><span>' + esc(m.text) + '</span><span class="time">GM · ' + esc(m.time) + '</span></div></div>';
       if (m.from === 'chef') return '<div class="msg-row"><span class="av av-chef">D</span>' + chefCard(m) + '</div>';
       return '<p class="msg-sys">' + esc(m.text) + '</p>';
     }).join('');
@@ -1001,10 +1001,10 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
     if (c.status === 'kitchen') {
       body = '<div class="state"><h4>Waiting on the head chef</h4><p>They have a text with a link. Answer due ' + esc(c.due) + '. When they answer, it lands in this thread.</p><button type="button" class="btn-ghost" data-act="nudge" style="align-self:flex-start">Nudge the head chef by text</button></div>';
     } else if (c.status === 'ops') {
-      body = '<div class="state"><h4>With Anna</h4><p>The head chef declined a job over ' + gbp(ESCALATE_AT) + ', so Anna decides whether to fix it before anyone tells the client.</p></div>';
+      body = '<div class="state"><h4>With the GM</h4><p>The head chef declined a job over ' + gbp(ESCALATE_AT) + ', so the GM decides whether to fix it before anyone tells the client.</p></div>';
     } else if (c.status === 'answered' && c.answer.kind === 'no') {
       body = '<div class="state"><h4>The kitchen can’t do this one</h4><p>Because: ' + c.answer.reasons.map(esc).join(', ') + '. It’s under ' + gbp(ESCALATE_AT) + ', so it’s your call.</p></div>' +
-        '<div class="block"><button type="button" class="btn btn-block" data-act="closeKitchen" data-arg="' + c.id + '">Close as lost, with the head chef’s reasons</button><button type="button" class="btn-ghost" data-act="askOps" data-arg="' + c.id + '">Ask Anna to review</button></div>';
+        '<div class="block"><button type="button" class="btn btn-block" data-act="closeKitchen" data-arg="' + c.id + '">Close as lost, with the head chef’s reasons</button><button type="button" class="btn-ghost" data-act="askOps" data-arg="' + c.id + '">Ask the GM to review</button></div>';
     } else if (c.status === 'answered') {
       body = quoteBuilder(c);
     } else if (c.status === 'quoted') {
@@ -1013,12 +1013,12 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
         '<div class="mail"><b>Not for you this time?</b><span>Tell us why in one tap. It helps us get it right next time.</span><div class="chips">' + ['Price', 'Menu', 'Date', 'Went elsewhere'].map(function (r) { return '<span class="chip chip-s">' + r + '</span>'; }).join('') + '</div></div></div>' +
         '<div class="block"><p class="label">How did it end?</p><div class="outcomes"><button type="button" data-act="won" data-arg="' + c.id + '">Won</button><button type="button" data-act="lostOpen" data-arg="' + c.id + '"' + (S.lostOpen === c.id ? ' aria-expanded="true"' : ' aria-expanded="false"') + '>Lost</button><button type="button" data-act="noReply" data-arg="' + c.id + '">No reply</button></div>' +
         (S.lostOpen === c.id ? '<p class="sub-h" style="margin-top:4px">Why did they say no?</p><div class="chips">' + LOST_REASONS.map(function (r) { return '<button type="button" class="chip" data-act="lostWhy" data-arg="' + esc(r) + '">' + esc(r) + '</button>'; }).join('') + '</div>' : '') +
-        '<p class="muted" style="font-size:13px">Every quote ends in one of these. That’s what feeds Anna’s ledger.</p></div>';
+        '<p class="muted" style="font-size:13px">Every quote ends in one of these. That’s what feeds the GM’s ledger.</p></div>';
     } else if (c.status === 'won') {
       body = '<div class="state" style="border-style:solid;border-color:var(--teal-2);background:var(--teal-wash)"><h4 style="color:var(--teal-ink)">Booked</h4><p>' + gbp(value(c)) + ' won.' + (c.answer && c.answer.kind === 'if' ? ' It started as a modified menu, and the head chef has been told it was booked.' : '') + '</p></div>' +
         '<p class="muted" style="font-size:13.5px">After the event, the head chef and the client each get one question: any complaints? It keeps every Yes honest.</p>';
     } else {
-      body = '<div class="state"><h4>Lost</h4><p>' + esc(c.lostWhy || '') + '. The reason is in Anna’s ledger.</p></div>';
+      body = '<div class="state"><h4>Lost</h4><p>' + esc(c.lostWhy || '') + '. The reason is in the GM’s ledger.</p></div>';
     }
     return '<aside class="card deal" aria-label="Deal">' + head + body + '</aside>';
   }
@@ -1055,9 +1055,9 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       '<aside class="stage-notes"><p class="label">Head chef’s phone</p><h2 class="display">No app. No password.</h2><ol>' +
       '<li>Each check arrives as a text from Ondo with a link. It works once and expires in 48 hours.</li>' +
       '<li>One tap to accept. Modify or decline asks why, and what would make it work.</li>' +
-      '<li>A decline on anything over £5,000 goes to Anna before the client hears it.</li>' +
+      '<li>A decline on anything over £5,000 goes to the GM before the client hears it.</li>' +
       '<li>When the job is booked, the head chef gets a text saying their decision won it.</li>' +
-      '<li>Every Monday there’s one more: anything Sam should know this week?</li>' +
+      '<li>Every Monday there’s one more: anything sales should know this week?</li>' +
       '</ol></aside></main>';
   }
   function smsLink(c) {
@@ -1069,19 +1069,19 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
     var c = c42(), w = S.checks['0143'];
     var out = '<div class="ph-head"><span class="ph-av"><span class="logo logo-sm" aria-hidden="true"></span></span><b>Ondo</b><small>Kitchen checks</small></div><div class="ph-body sms-list">' +
       '<span class="sms-day">Monday</span>' +
-      '<div class="sms"><span>Monday check-in: anything Sam should know this week? Holidays, kit, stock to push, supplier prices.</span>' +
+      '<div class="sms"><span>Monday check-in: anything sales should know this week? Holidays, kit, stock to push, supplier prices.</span>' +
       '<button type="button" class="link-card" data-act="openNotes"><span class="logo logo-xs" aria-hidden="true"></span><span class="lc-t"><b>Kitchen notes</b><small>' + (S.notesSaved ? 'Updated just now' : 'Updated Monday, 07:40') + '</small></span><span class="go">Open' + I.arrow + '</span></button></div>' +
       '<div class="sms dim"><span>Breakfast for 60 on Thu 3 Jun is quoted. Thanks, chef.</span></div>' +
       '<span class="sms-day">Today</span>' +
       '<div class="sms"><span>New check for Main kitchen: ' + esc(w.title.toLowerCase()) + ', ' + esc(w.date) + '.</span>' + smsLink(w) + '</div>';
     if (c) {
       out += '<div class="sms"><span>New check for Main kitchen: ' + esc(c.title.toLowerCase()) + ', ' + esc(c.date) + '. Answer by ' + esc(c.due) + '.</span>' + smsLink(c) + '</div>';
-      c.msgs.slice(1).forEach(function (m) { if (m.from === 'sales') out += '<div class="sms"><span><b style="font-weight:500">Sam, about #0142:</b> ' + esc(m.text) + '</span></div>'; });
+      c.msgs.slice(1).forEach(function (m) { if (m.from === 'sales') out += '<div class="sms"><span><b style="font-weight:500">Sales, about #0142:</b> ' + esc(m.text) + '</span></div>'; });
       if (c.status === 'won') out += '<div class="sms"><span>Good news: ' + esc(c.title.toLowerCase()) + ' is booked. Your ' + (c.answer.kind === 'if' ? 'modified menu' : 'answer') + ' won ' + gbp(value(c)) + '.</span></div>';
     } else {
-      out += '<p class="sms-day" style="margin-top:6px">Nothing else yet. Sam hasn’t sent #0142.</p>';
+      out += '<p class="sms-day" style="margin-top:6px">Nothing else yet. Sales hasn’t sent #0142.</p>';
     }
-    if (S.approved.length) out += '<div class="sms"><span>Anna approved: ' + FIXES.filter(function (f) { return S.approved.indexOf(f.id) > -1; }).map(function (f) { return f.name.toLowerCase(); }).join(', ') + '. Thanks for flagging them.</span></div>';
+    if (S.approved.length) out += '<div class="sms"><span>The GM approved: ' + FIXES.filter(function (f) { return S.approved.indexOf(f.id) > -1; }).map(function (f) { return f.name.toLowerCase(); }).join(', ') + '. Thanks for flagging them.</span></div>';
     return out + '</div><div class="ph-foot">Replies to this number aren’t read. Use the link.</div>';
   }
   function answerScreen() {
@@ -1103,11 +1103,11 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
         '<input class="input" id="ad-custom" data-ad="custom" placeholder="Something else? Type it here" aria-label="Another condition" value="' + esc(a.custom) + '"></div>';
     }
     if (a.kind) {
-      more += '<button type="button" class="rec" data-act="voice" aria-pressed="' + a.voice + '"><span class="mic">' + (a.voice ? I.check : I.mic) + '</span>' + (a.voice ? 'Voice note recorded · 0:14' : (a.kind === 'no' ? 'Tap to explain in a voice note' : 'Add a voice note for Sam (optional)')) + '</button>';
+      more += '<button type="button" class="rec" data-act="voice" aria-pressed="' + a.voice + '"><span class="mic">' + (a.voice ? I.check : I.mic) + '</span>' + (a.voice ? 'Voice note recorded · 0:14' : (a.kind === 'no' ? 'Tap to explain in a voice note' : 'Add a voice note for sales (optional)')) + '</button>';
     }
-    if (a.kind === 'no' && value(c) >= ESCALATE_AT) more += '<p class="notice">This job is worth ' + gbp(value(c)) + ', so Anna sees your decline before the client hears anything. She may be able to fix it.</p>';
+    if (a.kind === 'no' && value(c) >= ESCALATE_AT) more += '<p class="notice">This job is worth ' + gbp(value(c)) + ', so the GM sees your decline before the client hears anything, and may be able to fix it.</p>';
     if (a.kind === 'yes') {
-      more += '<p class="notice" style="background:var(--teal-wash);color:var(--teal-ink)">Sam quotes this menu. You’ll get a text if it’s booked.</p>';
+      more += '<p class="notice" style="background:var(--teal-wash);color:var(--teal-ink)">Sales quotes this menu. You’ll get a text if it’s booked.</p>';
     }
     return '<div class="ph-top"><button type="button" class="ph-back" data-act="phoneBack">' + I.back + 'Messages</button><span class="lock">' + I.lock + 'No login</span></div>' +
       '<div class="ph-body">' +
@@ -1120,7 +1120,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       ab('yes', 'Accept', 'We can do it as asked') + ab('if', 'Modify', 'We can, with changes or a cost') + ab('no', 'Decline', 'We can’t, and here’s why') + '</div></div>' +
       more + '</div>' +
       '<div class="ph-cta">' + (S.adError ? '<p class="err" role="alert">' + S.adError + '</p>' : '') +
-      '<button type="button" class="btn btn-block" data-act="sendAnswer"' + (a.kind ? '' : ' disabled') + '>' + (a.kind === 'no' && value(c) >= ESCALATE_AT ? 'Send to Anna and Sam' : 'Send to Sam') + ' ' + I.arrow + '</button></div>';
+      '<button type="button" class="btn btn-block" data-act="sendAnswer"' + (a.kind ? '' : ' disabled') + '>' + (a.kind === 'no' && value(c) >= ESCALATE_AT ? 'Send to the GM and sales' : 'Send to sales') + ' ' + I.arrow + '</button></div>';
   }
   function menuBlock(c, a) {
     var m = menuOf(c, a.picks);
@@ -1136,18 +1136,18 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
   }
   function notesScreen() {
     return '<div class="ph-top"><button type="button" class="ph-back" data-act="phoneBack">' + I.back + 'Messages</button><span class="lock">' + I.lock + 'No login</span></div>' +
-      '<div class="ph-body"><div style="display:flex;flex-direction:column;gap:4px"><span class="label">Main kitchen · this week</span><h2 class="t-title">Kitchen notes</h2><p class="t-meta">Sam sees these whenever he writes a check, so he doesn’t sell what the kitchen can’t do this week.</p></div>' +
+      '<div class="ph-body"><div style="display:flex;flex-direction:column;gap:4px"><span class="label">Main kitchen · this week</span><h2 class="t-title">Kitchen notes</h2><p class="t-meta">Sales sees these on every check, so nobody sells what the kitchen can’t do this week.</p></div>' +
       S.notes.map(function (n, i) { return '<button type="button" class="opt" data-act="note" data-arg="' + i + '" aria-pressed="' + n.on + '"><span class="bx">' + (n.on ? I.check : '') + '</span><span style="display:flex;flex-direction:column;gap:2px"><span class="mc">' + esc(n.k) + '</span><span>' + esc(n.t) + '</span></span></button>'; }).join('') +
       '<input class="input" id="note-add" placeholder="Anything else? Type it here" aria-label="Another kitchen note">' +
-      '</div><div class="ph-cta"><button type="button" class="btn btn-block" data-act="saveNotes">Save for Sam ' + I.arrow + '</button></div>';
+      '</div><div class="ph-cta"><button type="button" class="btn btn-block" data-act="saveNotes">Save for sales ' + I.arrow + '</button></div>';
   }
   function doneScreen() {
     var c = S.checks[S.phoneCheck];
     var last = null;
     for (var i = c.msgs.length - 1; i >= 0; i--) { if (c.msgs[i].from === 'chef') { last = c.msgs[i]; break; } }
-    var to = c.status === 'ops' ? 'Sent to Anna' : 'Sent to Sam';
+    var to = c.status === 'ops' ? 'Sent to the GM' : 'Sent to sales';
     return '<div class="ph-top"><button type="button" class="ph-back" data-act="phoneBack">' + I.back + 'Messages</button><span class="lock">' + I.lock + 'No login</span></div>' +
-      '<div class="done"><span class="done-ring">' + I.bigcheck + '</span><h2>' + to + '</h2><p>' + (c.status === 'ops' ? 'Anna will look at what it would take before the client hears anything.' : 'Thanks, chef. Sam will quote from your answer.') + '</p>' +
+      '<div class="done"><span class="done-ring">' + I.bigcheck + '</span><h2>' + to + '</h2><p>' + (c.status === 'ops' ? 'The GM will look at what it would take before the client hears anything.' : 'Thanks, chef. Sales will quote from your answer.') + '</p>' +
       (last ? chefCard(last) : '') + '</div>' +
       '<div class="ph-cta"><button type="button" class="btn-ghost" data-act="phoneBack" style="width:100%">Back to messages</button></div>';
   }
@@ -1172,8 +1172,8 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
   /* Example decision history: 17 weeks, three kitchens, seeded so it is the same every time. */
   var SITES = [
     { id: 'main', name: 'Main kitchen', short: 'Main kitchen', chef: 'Head chef', who: 'Head chef', counts: { yes: 40, if: 15, no: 8 } },
-    { id: 'gla', name: 'Museum café, Glasgow', short: 'Glasgow', chef: 'Ola', who: 'Ola, kitchen manager', counts: { yes: 18, if: 6, no: 14 } },
-    { id: 'edi', name: 'Conference centre, Edinburgh', short: 'Edinburgh', chef: 'Raj', who: 'Raj, kitchen manager', counts: { yes: 38, if: 10, no: 3 } }
+    { id: 'gla', name: 'Museum café, Glasgow', short: 'Glasgow', chef: 'Head chef', who: 'Head chef', counts: { yes: 18, if: 6, no: 14 } },
+    { id: 'edi', name: 'Conference centre, Edinburgh', short: 'Edinburgh', chef: 'Head chef', who: 'Head chef', counts: { yes: 38, if: 10, no: 3 } }
   ];
   var SITE_BY = {}; SITES.forEach(function (x) { SITE_BY[x.id] = x; });
   var DEC = { yes: 'Accepted', if: 'Modified', no: 'Declined' };
@@ -1341,7 +1341,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
     if (d.outcome === 'won') return '<span class="pill pill-won">Won</span>';
     if (d.outcome === 'lost-kitchen') return '<span class="pill pill-stale">Lost · declined</span>';
     if (d.outcome === 'lost-client') return '<span class="pill pill-lost">Lost · ' + esc(d.lostWhy.toLowerCase()) + '</span>';
-    return '<span class="pill pill-ops">' + (d.status === 'ops' ? 'With Anna' : 'Open') + '</span>';
+    return '<span class="pill pill-ops">' + (d.status === 'ops' ? 'With the GM' : 'Open') + '</span>';
   }
   function siteSeg() {
     var opts = [['all', 'All kitchens']].concat(SITES.map(function (s) { return [s.id, s.short]; }));
@@ -1372,7 +1372,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
     var acc = DATA.filter(function (d) { return d.kind === 'yes'; }), mod = DATA.filter(function (d) { return d.kind === 'if'; });
     var accW = pct(acc.filter(function (d) { return d.outcome === 'won'; }).length, acc.length);
     var modW = pct(mod.filter(function (d) { return d.outcome === 'won'; }).length, mod.length);
-    out.push({ tag: 'opp', label: 'Opportunity', title: 'Modified jobs are won ' + modW + '% of the time, accepts ' + accW + '%', body: 'A modified menu still books, often better. Push kitchen managers to modify rather than decline.', drill: 'all|if||' });
+    out.push({ tag: 'opp', label: 'Opportunity', title: 'Modified jobs are won ' + modW + '% of the time, accepts ' + accW + '%', body: 'A modified menu still books, often better. Push head chefs to modify rather than decline.', drill: 'all|if||' });
     var reqs = requestStats(DATA);
     if (reqs.length) {
       var top = reqs[0];
@@ -1416,7 +1416,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       navItem('opsView', 'trends', I.trend, 'Trends', S.opsView === 'trends')
     ];
     var page = S.opsView === 'decisions' ? decisionsPage() : S.opsView === 'trends' ? trendsPage() : overview(escs);
-    return '<div class="app">' + side(nav, ['A', 'Anna', 'General manager']) + '<main class="page" id="main">' + page + '</main></div>';
+    return '<div class="app">' + side(nav, ['G', 'General manager', 'All three kitchens']) + '<main class="page" id="main">' + page + '</main></div>';
   }
 
   function overview(escs) {
@@ -1428,7 +1428,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
         '<div><h3 class="display">' + esc(c.title) + '</h3><p class="muted">' + esc(c.date) + ' · ' + c.covers + ' covers' + (c.days ? ' a day for ' + c.days + ' days' : '') + ' · ' + esc(c.client) + '</p></div>' +
         '<div class="esc-grid"><div style="display:flex;flex-direction:column;gap:8px"><p class="label">Head chef’s reasons</p><p>' + a.reasons.map(esc).join(' · ') + '</p>' + (a.note ? '<p class="chef-quote">“' + esc(a.note) + '”</p>' : '') + '</div>' +
         '<div style="display:flex;flex-direction:column;gap:8px"><p class="label">What it would take</p><ul>' + (c.fixOptions || []).map(function (f) { return '<li>' + I.check + esc(f) + '</li>'; }).join('') + '</ul></div></div>' +
-        '<div class="esc-actions"><button type="button" class="btn" data-act="opsApprove" data-arg="' + c.id + '">Approve the fix, back to Sam ' + I.arrow + '</button><button type="button" class="btn-ghost" data-act="opsDecline" data-arg="' + c.id + '">Let the decline stand</button></div></article>';
+        '<div class="esc-actions"><button type="button" class="btn" data-act="opsApprove" data-arg="' + c.id + '">Approve the fix, back to sales ' + I.arrow + '</button><button type="button" class="btn-ghost" data-act="opsDecline" data-arg="' + c.id + '">Let the decline stand</button></div></article>';
     }).join('') : '<div class="card empty">' + I.check + ' Nothing needs your call right now.</div>';
 
     var siteRows = SITES.map(function (s) {
@@ -1488,7 +1488,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       '<div class="kpi"><span>Lost to kitchen declines</span><b>' + k1(t.kv) + '</b><small>' + t.kn + ' checks</small></div>' +
       '<div class="kpi"><span>Lost after quoting</span><b>' + k1(t.cv) + '</b><small>' + t.cn + ' checks, client said no</small></div></div>' +
       '<div class="lg-grid"><section class="card why" aria-label="Kitchens side by side"><div class="fc-top"><h2 class="display" style="font-size:26px">Kitchens, side by side</h2><div class="legend"><span><i style="background:var(--ink-2)"></i>Accepted</span><span><i style="background:var(--if)"></i>Modified</span><span><i style="background:var(--no)"></i>Declined</span></div></div>' +
-      '<div class="tbl-wrap"><table><thead><tr><th>Kitchen</th><th>How the kitchen manager answered</th><th style="text-align:right">Won</th><th>Top reason</th></tr></thead><tbody>' + siteRows + '</tbody></table></div>' +
+      '<div class="tbl-wrap"><table><thead><tr><th>Kitchen</th><th>How the head chef answered</th><th style="text-align:right">Won</th><th>Top reason</th></tr></thead><tbody>' + siteRows + '</tbody></table></div>' +
       '<p class="muted" style="font-size:13px">Same menus and prices in all three. The difference is in the answers.</p></section>' +
       '<section class="card why" aria-label="Worth a look"><div class="fc-top"><h2 class="display" style="font-size:26px;margin-bottom:4px">Worth a look</h2><button type="button" class="linkish" data-act="opsView" data-arg="trends">All trends ' + I.arrow + '</button></div>' + insights().slice(0, 3).map(insightHtml).join('') + '</section></div>' +
       '<div class="lg-grid lower"><section class="card why" aria-label="Why we lost"><h2 class="display" style="font-size:26px;margin-bottom:6px">Why we lost, by value</h2><p class="label">Declined by the kitchen</p>' + bars(kit, 'kitchen') + '<p class="label" style="margin-top:10px">Client said no after a quote</p>' + bars(cli, 'client') + '</section>' +
@@ -1498,7 +1498,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       '<div class="chart" role="img" aria-label="Weekly forecast, May to August: £156.0k from work like what was won, plus ' + k1(rec) + ' from the ticked fixes."><div class="yax" aria-hidden="true">' + yax + '</div><div class="plot">' + grid + '<div class="cols">' + cols + '</div></div></div>' +
       '<div class="xax" aria-hidden="true"><span>May</span><span>June</span><span>July</span><span>August</span></div>' +
       '<p class="muted" style="font-size:13px">Weekly. Assumes the next four months bring the same kinds of enquiries.</p></section>' +
-      '<section class="card fx" aria-label="Fixes"><h2 class="display" style="font-size:26px">Fixes, best return first</h2><p class="muted" style="font-size:14px;margin-top:-4px">From the kitchen managers’ reasons. Tick one to add it to the forecast.</p>' + fixesHtml +
+      '<section class="card fx" aria-label="Fixes"><h2 class="display" style="font-size:26px">Fixes, best return first</h2><p class="muted" style="font-size:14px;margin-top:-4px">From the head chefs’ reasons. Tick one to add it to the forecast.</p>' + fixesHtml +
       '<div class="fx-sum"><div><span>Spend</span><b>' + gbp(spend) + '</b></div><div style="text-align:right"><span>Win back</span><b>' + gbp(rec) + '</b></div></div>' +
       '<button type="button" class="btn-ghost" data-act="approveFixes"' + (allApproved || !S.picked.length ? ' disabled' : '') + '>' + (allApproved ? I.check + 'Approved. The head chef has been told' : 'Approve the ticked fixes') + '</button></section></div>';
   }
@@ -1546,7 +1546,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
         return '<button type="button" class="chip" data-act="decReason" data-arg="' + esc(r) + '" aria-pressed="' + (S.decReason === r) + '">' + esc(r) + ' <span class="mono" style="font-size:12px;opacity:.75">' + reasonCounts[r] + '</span></button>';
       }).join('') + '</div>' +
       (S.decReq ? '<div class="filters"><span class="label" style="margin-right:4px">Request</span><button type="button" class="chip" aria-pressed="true" data-act="decReq" data-arg="">' + esc(S.decReq) + ' ✕</button></div>' : '');
-    return '<div class="page-head"><p class="label">Kitchen decisions · since 4 January · example data</p><h1 class="display">Every decision, and why</h1><p class="sub">Each check the kitchen manager accepted, modified or declined, the reasons, what was changed, and what happened next. Tap a row for the whole story.</p></div>' +
+    return '<div class="page-head"><p class="label">Kitchen decisions · since 4 January · example data</p><h1 class="display">Every decision, and why</h1><p class="sub">Each check the head chef accepted, modified or declined, the reasons, what was changed, and what happened next. Tap a row for the whole story.</p></div>' +
       '<div class="ops-top">' + siteSeg() + '</div>' +
       '<section class="card dec" aria-label="Decisions">' + filters +
       '<p class="dec-sum"><b>' + list.length + '</b> decisions · ' + t.no + ' declined (' + gbp(t.kv) + ' never quoted) · ' + t.if + ' modified · ' + t.won + ' won</p>' +
@@ -1739,7 +1739,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       var v = el ? el.value.trim() : '';
       if (v) S.notes.push({ k: 'Note', t: v, on: true });
       S.notesSaved = true; S.phone = 'messages';
-      toast('Saved. Sam sees these on every new check');
+      toast('Saved. Sales sees these on every new check');
     },
     approveFixes: function () {
       var add = S.picked.filter(function (id) { return S.approved.indexOf(id) < 0; });
@@ -1755,7 +1755,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
     sendAnswer: function () {
       var c = S.checks[S.phoneCheck], a = S.ad;
       if (!a.kind) return;
-      if (a.kind !== 'yes' && !a.reasons.length) { S.adError = 'Tap at least one reason so Sam and Anna know why.'; return; }
+      if (a.kind !== 'yes' && !a.reasons.length) { S.adError = 'Tap at least one reason so sales and the GM know why.'; return; }
       var swaps = a.kind === 'no' ? [] : swapsOf(c, a.picks);
       if (a.kind === 'if' && !a.fixes.length && !a.custom.trim() && !swaps.length) { S.adError = 'Swap a dish, tick what would make it a yes, or type it.'; return; }
       var t = tick();
@@ -1764,7 +1764,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       c.msgs.push({ from: 'chef', kind: a.kind, reasons: c.answer.reasons, fixes: c.answer.fixes, custom: c.answer.custom, voice: a.voice, menu: menu, swaps: swaps, time: t });
       if (a.kind === 'no' && value(c) >= ESCALATE_AT) {
         c.status = 'ops';
-        c.msgs.push({ from: 'system', text: 'Over £5,000, so it went to Anna first' });
+        c.msgs.push({ from: 'system', text: 'Over £5,000, so it went to the GM first' });
       } else {
         c.status = 'answered';
       }
@@ -1796,7 +1796,7 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
       chefOutcomeSystem(c);
       S.live.push({ type: 'won', title: c.title, date: c.date, value: value(c), why: c.answer && c.answer.kind === 'if' ? 'Booked. Started as a modified menu.' : 'Booked.' });
       S.flashWon = true; S.lostOpen = null;
-      toast('Marked won. Anna’s ledger is updated');
+      toast('Marked won. The GM’s ledger is updated');
     },
     lostOpen: function (id) { S.lostOpen = S.lostOpen === id ? null : id; },
     lostWhy: function (r) { closeClient(S.lostOpen, r); },
@@ -1811,22 +1811,22 @@ tr.detail td { padding: 0 0 14px; background: var(--teal-wash); }
     askOps: function (id) {
       var c = S.checks[id];
       c.status = 'ops'; c.updated = tick();
-      c.msgs.push({ from: 'system', text: 'Sent to Anna to review' });
-      toast('Sent to Anna');
+      c.msgs.push({ from: 'system', text: 'Sent to the GM to review' });
+      toast('Sent to the GM');
     },
     opsApprove: function (id) {
       var c = S.checks[id], t = tick();
       c.answer = { kind: 'if', reasons: c.answer.reasons, fixes: c.fixOptions.slice(), custom: '', voice: false, approved: true, menu: c.courses ? menuOf(c, c.picks.if) : null, swaps: [] };
       if (!c.answer.menu && !(c.menus && c.menus.if)) { c.menus = c.menus || {}; c.menus.if = { lines: [['Chef’s menu to budget']], price: Math.max(0, c.budget - COFFEE) }; }
       c.status = 'answered'; c.updated = t; c.unread = true;
-      c.msgs.push({ from: 'ops', text: 'Approved: ' + c.fixOptions.join('; ') + '. Sam, quote it with those costs in.', time: t });
-      toast('Approved. Back to Sam to quote');
+      c.msgs.push({ from: 'ops', text: 'Approved: ' + c.fixOptions.join('; ') + '. Sales, quote it with those costs in.', time: t });
+      toast('Approved. Back to sales to quote');
     },
     opsDecline: function (id) {
       var c = S.checks[id];
       c.status = 'lost'; c.updated = tick(); c.lostWhy = 'Kitchen: ' + c.answer.reasons.join(', ');
-      c.msgs.push({ from: 'system', text: 'Anna let the decline stand. Logged with the head chef’s reasons' });
-      S.live.push({ type: 'kitchen', title: c.title, date: c.date, value: value(c), reasons: c.answer.reasons.slice(), why: c.answer.reasons.join(', ') + '. Anna let the decline stand.' });
+      c.msgs.push({ from: 'system', text: 'The GM let the decline stand. Logged with the head chef’s reasons' });
+      S.live.push({ type: 'kitchen', title: c.title, date: c.date, value: value(c), reasons: c.answer.reasons.slice(), why: c.answer.reasons.join(', ') + '. The GM let the decline stand.' });
       toast('Logged as lost, with the reasons');
     },
     pickFix: function (id) { S.picked = toggleIn(S.picked, id); },
